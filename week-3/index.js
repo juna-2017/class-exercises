@@ -109,15 +109,23 @@ var TAX_RATE = 0.1;
 
 //functions
 function getHandling(itemPrice) {
-  return HANDLING_COSTS;
+  if (itemPrice < 20) {
+    return 0;
+  } else {
+    return HANDLING_COSTS;
+  }
 }
 
 function getShipping(itemPrice) {
   return itemPrice * SHIPPING_RATE;
 }
 
-function getTax(itemPrice) {
-  return itemPrice * TAX_RATE;
+function getTax(itemPrice, isTaxExempt) {
+  if (isTaxExempt) {
+    return 0
+  } else {
+    return itemPrice * TAX_RATE;
+  }
 }
 
 function getTotalCost(item) {
@@ -125,22 +133,48 @@ function getTotalCost(item) {
     item.price +
     getHandling(item.price) +
     getShipping(item.price) +
-    getTax(item.price)
+    getTax(item.price, item.isTaxExempt)
   );
 }
 
+function printItem(item) {
+    console.log ("itemID:", item.id, item.description, "Price: $", item.price, "cost: $", getTotalCost(item))
+}
+
 //unit tests: tests one function
-console.assert(getHandling(10) === 4);
+console.assert(getHandling(10) === 0);
 console.assert(getHandling(20) === 4);
 
 console.assert(getShipping(10) === 1);
 console.assert(getShipping(20) === 2);
 console.assert(getShipping(100) === 10);
 
-console.assert(getTax(10) === 1);
-console.assert(getTax(20) === 2);
+console.assert(getTax(10, false) === 1);
+console.assert(getTax(20, false) === 2);
+console.assert(getTax(10, true) === 0);
+console.assert(getTax(20, true) === 0);
 
 //integration tests: tests more thn one function
-console.assert(getTotalCost({ price: 10, isTaxExempt: false }) === 16);
+console.assert(getTotalCost({ price: 10, isTaxExempt: false }) === 12);
 console.assert(getTotalCost({ price: 20, isTaxExempt: false }) === 28);
 console.assert(getTotalCost({ price: 30, isTaxExempt: false }) === 40);
+
+var testItems = [
+    {
+        id: 001, price: 5, isTaxExempt: true, description: 'Wonderglue'
+    },
+
+    {
+        id: 002, price: 7, isTaxExempt: false, description: 'Tire Iron'
+    },
+
+    {
+        id: 003, price: 30, isTaxExempt: false, description: 'Plasma Pistol'
+    }
+
+]
+
+for(var i= 0; i < testItems.length; i++) {
+    console.log(i);
+    printItem(testItems[i]);
+}
